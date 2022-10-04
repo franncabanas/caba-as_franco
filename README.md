@@ -1,4 +1,4 @@
-#Readme.md#
+
 - Título: Curso de programacion full stack
 - Subtitulo: Comisión A
 - Encabezado: Silicon Misiones - https://siliconmisiones.gob.ar/
