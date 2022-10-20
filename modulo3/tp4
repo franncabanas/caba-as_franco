@@ -1,0 +1,305 @@
+
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+CREATE SCHEMA IF NOT EXISTS `silicon` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
+USE `silicon` ;
+
+-- -----------------------------------------------------
+-- Table `silicon`.`alumno`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`alumno` (
+  `cod_matricula` INT NOT NULL AUTO_INCREMENT,
+  `nombre_alumno` INT NOT NULL,
+  `dni` VARCHAR(8) NULL DEFAULT NULL,
+  `fechanacimiento` DATE NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`cod_matricula`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+-- -----------------------------------------------------
+-- Table `silicon`.`curso`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`curso` (
+  `curso_nombre` INT NOT NULL,
+  `nombre` INT NOT NULL,
+  PRIMARY KEY (`curso_nombre`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table `silicon`.`profesor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`profesor` (
+  `idprofesor` INT NOT NULL AUTO_INCREMENT,
+  `nombre_profesor` INT NOT NULL,
+  `especialidad` INT NOT NULL,
+  `email_profesor` INT NOT NULL,
+  PRIMARY KEY (`idprofesor`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table `silicon`.`alumno_has_profesor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`alumno_has_profesor` (
+  `alumno_cod_matricula` INT NOT NULL,
+  `profesor_idprofesor` INT NOT NULL,
+  PRIMARY KEY (`alumno_cod_matricula`, `profesor_idprofesor`),
+  INDEX `fk_alumno_has_profesor_profesor1_idx` (`profesor_idprofesor` ASC) VISIBLE,
+  INDEX `fk_alumno_has_profesor_alumno_idx` (`alumno_cod_matricula` ASC) VISIBLE,
+  CONSTRAINT `fk_alumno_has_profesor_alumno`
+    FOREIGN KEY (`alumno_cod_matricula`)
+    REFERENCES `silicon`.`alumno` (`cod_matricula`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_alumno_has_profesor_profesor1`
+    FOREIGN KEY (`profesor_idprofesor`)
+    REFERENCES `silicon`.`profesor` (`idprofesor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`profesor_has_curso`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`profesor_has_curso` (
+  `profesor_idprofesor` INT NOT NULL,
+  `curso_curso_nombre` INT NOT NULL,
+  PRIMARY KEY (`profesor_idprofesor`, `curso_curso_nombre`),
+  INDEX `fk_profesor_has_curso_curso1_idx` (`curso_curso_nombre` ASC) VISIBLE,
+  INDEX `fk_profesor_has_curso_profesor1_idx` (`profesor_idprofesor` ASC) VISIBLE,
+  CONSTRAINT `fk_profesor_has_curso_profesor1`
+    FOREIGN KEY (`profesor_idprofesor`)
+    REFERENCES `silicon`.`profesor` (`idprofesor`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_profesor_has_curso_curso1`
+    FOREIGN KEY (`curso_curso_nombre`)
+    REFERENCES `silicon`.`curso` (`curso_nombre`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`pais`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`pais` (
+  `id_pais` INT NOT NULL AUTO_INCREMENT,
+  `nombrepais` VARCHAR(30) NOT NULL,
+  PRIMARY KEY (`id_pais`),
+  UNIQUE INDEX `nombrepais_UNIQUE` (`nombrepais` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`provincia`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`provincia` (
+  `id_provincia` INT NOT NULL AUTO_INCREMENT,
+  `nombre_provincia` VARCHAR(25) NOT NULL,
+  `pais_id_pais` INT NOT NULL,
+  PRIMARY KEY (`id_provincia`, `pais_id_pais`),
+  INDEX `fk_provincia_pais1_idx` (`pais_id_pais` ASC) VISIBLE,
+  CONSTRAINT `fk_provincia_pais1`
+    FOREIGN KEY (`pais_id_pais`)
+    REFERENCES `silicon`.`pais` (`id_pais`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`localidad`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`localidad` (
+  `id_localidad` INT NOT NULL AUTO_INCREMENT,
+  `nombre_localidad` VARCHAR(45) NOT NULL,
+  `cod_postal` INT NOT NULL,
+  `provincia_id_provincia` INT NOT NULL,
+  PRIMARY KEY (`id_localidad`, `provincia_id_provincia`),
+  INDEX `fk_localidad_provincia1_idx` (`provincia_id_provincia` ASC) VISIBLE,
+  CONSTRAINT `fk_localidad_provincia1`
+    FOREIGN KEY (`provincia_id_provincia`)
+    REFERENCES `silicon`.`provincia` (`id_provincia`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`empleado`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`empleado` (
+  `id_empleado` INT NOT NULL AUTO_INCREMENT,
+  `nombre_empleado` VARCHAR(55) NOT NULL,
+  `dni_empleado` INT NOT NULL,
+  `telefono_empleado` VARCHAR(12) NOT NULL,
+  `email_empleado` VARCHAR(75) NOT NULL,
+  `fecha_alta` DATE NOT NULL,
+  `localidad_id_localidad` INT NOT NULL,
+  PRIMARY KEY (`id_empleado`, `localidad_id_localidad`),
+  INDEX `fk_empleado_localidad1_idx` (`localidad_id_localidad` ASC) VISIBLE,
+  CONSTRAINT `fk_empleado_localidad1`
+    FOREIGN KEY (`localidad_id_localidad`)
+    REFERENCES `silicon`.`localidad` (`id_localidad`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table `silicon`.`cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`cliente` (
+  `id_cliente` INT NOT NULL AUTO_INCREMENT,
+  `nombre_cliente` VARCHAR(75) NOT NULL,
+  `dni_cliente` INT NOT NULL,
+  `direccion_ciente` VARCHAR(65) NOT NULL,
+  `telefono_cliente` VARCHAR(20) NOT NULL,
+  PRIMARY KEY (`id_cliente`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table `silicon`.`coches`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`coches` (
+  `matricula` INT NOT NULL,
+  `modelo_coche` VARCHAR(45) NOT NULL,
+  `color_coche` VARCHAR(45) NOT NULL,
+  `marca_coche` VARCHAR(45) NOT NULL,
+  `combustible` VARCHAR(15) NOT NULL,
+  `tipo_combustible` VARCHAR(25) NOT NULL,
+  `precio_coche` INT NOT NULL,
+  PRIMARY KEY (`matricula`),
+  UNIQUE INDEX `matricula_UNIQUE` (`matricula` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+-- -----------------------------------------------------
+-- Table `silicon`.`reservas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`reservas` (
+  `id_reservas` INT NOT NULL AUTO_INCREMENT,
+  `fecha_inicio` DATE NOT NULL,
+  `fecha_fin` DATE NOT NULL,
+  `matricula` VARCHAR(7) NOT NULL,
+  `precio_total` INT NOT NULL,
+  PRIMARY KEY (`id_reservas`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`cliente_has_reservas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`cliente_has_reservas` (
+  `cliente_id_cliente` INT NOT NULL,
+  `reservas_id_reservas` INT NOT NULL,
+  PRIMARY KEY (`cliente_id_cliente`, `reservas_id_reservas`),
+  INDEX `fk_cliente_has_reservas_reservas1_idx` (`reservas_id_reservas` ASC) VISIBLE,
+  INDEX `fk_cliente_has_reservas_cliente1_idx` (`cliente_id_cliente` ASC) VISIBLE,
+  CONSTRAINT `fk_cliente_has_reservas_cliente1`
+    FOREIGN KEY (`cliente_id_cliente`)
+    REFERENCES `silicon`.`cliente` (`id_cliente`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_cliente_has_reservas_reservas1`
+    FOREIGN KEY (`reservas_id_reservas`)
+    REFERENCES `silicon`.`reservas` (`id_reservas`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+
+-- -----------------------------------------------------
+-- Table `silicon`.`reservas_has_coches`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `silicon`.`reservas_has_coches` (
+  `reservas_id_reservas` INT NOT NULL,
+  `coches_matricula` INT NOT NULL,
+  PRIMARY KEY (`reservas_id_reservas`, `coches_matricula`),
+  INDEX `fk_reservas_has_coches_coches1_idx` (`coches_matricula` ASC) VISIBLE,
+  INDEX `fk_reservas_has_coches_reservas1_idx` (`reservas_id_reservas` ASC) VISIBLE,
+  CONSTRAINT `fk_reservas_has_coches_reservas1`
+    FOREIGN KEY (`reservas_id_reservas`)
+    REFERENCES `silicon`.`reservas` (`id_reservas`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_reservas_has_coches_coches1`
+    FOREIGN KEY (`coches_matricula`)
+    REFERENCES `silicon`.`coches` (`matricula`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb4
+COLLATE = utf8mb4_0900_ai_ci;
+
+insert into alumno values(1,'Franco Cabañas','3972507','1996-07-20','franncabanas@gmail.com')
+insert into alumno values(2,'German Garmendia','37522107','1985-01-05','germans@gmail.com')
+insert into alumno values(3,'Nestor Arina','40253452','1999-03-22','nestitor@gmail.com')
+insert into curso values(1,'geografia')
+insert into curso values(2,'matematica')
+insert into curso values(3,'lengua')
+insert into profesor values(1,'Garcia Ramon','Contador','reimongar@gmail.com')
+insert into profesor values(2,'Albert Lucia','Geografa','luchialbert@gmail.com')
+insert into profesor values(3,'Paredes Gerardo','Historiador','gerardito@gmail.com')
+
+insert into pais values(10,'Argentina');
+insert into pais values(20,'Brasil');
+insert into pais values(30,'Uruguay');
+
+insert into provincia values(11,'Misiones');
+insert into provincia values(21,'Brasilia');
+insert into provincia values(31,'Montevideo');
+
+insert into localidad values(12,'Posadas');
+insert into localidad values(22,'Brasilia');
+insert into localidad values(32,'Bahia');
+
+
+insert into empleado values(100,'Gonzalez Mauro','17170123','3764452354','gonzama@gmail.com','2012-07-06');
+insert into empleado values(101,'Gonzalez Silvia','18523652','3755245633','silvita@gmail.com','2018-01-03');
+insert into empleado values(102,'Perez Josias','37523325','3654223125','josua@gmail.com','2019-03-12');
+
+
+insert into cliente values(200,'Oliva Juan','17170123','Tamareu4344','37654225863');
+insert into cliente values(201,'Retamar Pedro','19533358','GeneralPaz335','3764533255');
+insert into cliente values(203,'Barrios Monica','37523352','RoquePerez633','3768553225');
+
+insert into reservas values(301,'2022-06-05','2022-06-08','aa054cc','7000');
+insert into reservas values(302,'2022-07-02','2022-08-10','ad005yp','3000');
+insert into reservas values(303,'2022-01-15','2022-12-08','ae001as','5000');
+
+insert into coches values('ac054cc','fiesta','rojo','ford','medio','nafta','7000');
+insert into coches values('ad005yp','207','negro','peugeot','medio','nafta','3000');
+insert into coches values('ae001as','civic','gris','honda','lleno','nafta','5000');
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
